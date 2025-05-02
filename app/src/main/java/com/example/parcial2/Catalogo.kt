@@ -1,8 +1,6 @@
 package com.example.parcial2.ui.theme
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -18,6 +16,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import coil.compose.rememberImagePainter
 import com.example.parcial2.Producto
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.tooling.preview.Preview
+
 
 @Composable
 fun Catalogo(
@@ -33,12 +36,15 @@ fun Catalogo(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color(0xFFFFFDE7))
             .padding(16.dp)
     ) {
+        Spacer(modifier = Modifier.height(32.dp))
         Text(
             "Catálogo de Productos",
-            style = MaterialTheme.typography.headlineSmall.copy(color = Color.Red),
+            style = MaterialTheme.typography.headlineSmall,
+            color = Color(0xFF33691E),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -47,54 +53,53 @@ fun Catalogo(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp)
-                        .clickable { onNavigateToDetalle(producto.id) },
-
-                    shape = MaterialTheme.shapes.medium,
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFF333333))
+                        .padding(vertical = 8.dp)
+                        .shadow(4.dp, shape = RoundedCornerShape(12.dp)),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9))
                 ) {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
                             .padding(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Image(
                             painter = rememberImagePainter(
-                                data = producto.imagenUrl,
+                                data = producto.imagenUrl.ifBlank { "https://via.placeholder.com/150" },
                                 builder = {
                                     placeholder(android.R.drawable.ic_menu_gallery)
                                     error(android.R.drawable.ic_delete)
                                 }
                             ),
-                            contentDescription = "Imagen del Producto",
+                            contentDescription = "Imagen del producto",
                             modifier = Modifier
                                 .size(80.dp)
-                                .clip(MaterialTheme.shapes.small)
+                                .clip(RoundedCornerShape(8.dp))
                         )
 
-                        Spacer(Modifier.width(12.dp))
+                        Spacer(Modifier.width(16.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 producto.nombre,
-                                style = MaterialTheme.typography.titleMedium.copy(color = Color.White),
+                                style = MaterialTheme.typography.titleMedium.copy(color = Color(0xFF2E7D32))
                             )
                             Text(
                                 "$${producto.precio}",
-                                style = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
+                                style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF388E3C))
                             )
                         }
 
-                        IconButton(onClick = { onNavigateToDetalle(producto.id) }) {
-                            Icon(Icons.Default.Info, contentDescription = "Ver detalle", tint = Color.White)
-                        }
-
-                        IconButton(onClick = {
-                            productoAEliminar = producto
-                            showDialog = true
-                        }) {
-                            Icon(Icons.Default.Delete, contentDescription = "Eliminar producto", tint = Color.White)
+                        Column(horizontalAlignment = Alignment.End) {
+                            IconButton(onClick = { onNavigateToDetalle(producto.id) }) {
+                                Icon(Icons.Default.Info, contentDescription = "Detalle", tint = Color(0xFF33691E))
+                            }
+                            IconButton(onClick = {
+                                productoAEliminar = producto
+                                showDialog = true
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color(0xFFB71C1C))
+                            }
                         }
                     }
                 }
@@ -105,26 +110,27 @@ fun Catalogo(
 
         Text(
             "Total Carrito: $${carrito.sumOf { it.precio }}",
-            style = MaterialTheme.typography.bodyLarge.copy(color = Color.White)
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color(0xFF33691E)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(
                 onClick = onNavigateToRegistro,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                shape = MaterialTheme.shapes.medium
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF81C784))
             ) {
                 Text("Agregar Producto", color = Color.White)
             }
             Button(
                 onClick = onNavigateToCarrito,
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                shape = MaterialTheme.shapes.medium
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF66BB6A))
             ) {
                 Text("Ver Carrito", color = Color.White)
             }
@@ -134,8 +140,8 @@ fun Catalogo(
     if (showDialog && productoAEliminar != null) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Eliminar producto", color = Color.Red) },
-            text = { Text("¿Seguro que deseas eliminar '${productoAEliminar?.nombre}'?", color = Color.White) },
+            title = { Text("¿Eliminar producto?") },
+            text = { Text("¿Seguro que deseas eliminar '${productoAEliminar?.nombre}' del catálogo?") },
             confirmButton = {
                 TextButton(onClick = {
                     productos.remove(productoAEliminar)
@@ -150,9 +156,30 @@ fun Catalogo(
                     showDialog = false
                     productoAEliminar = null
                 }) {
-                    Text("Cancelar", color = Color.White)
+                    Text("Cancelar")
                 }
             }
+        )
+    }
+}
+
+@Preview(showSystemUi = true, showBackground = true)
+@Composable
+fun PreviewCatalogo() {
+    Parcial2Theme {
+        val productos = remember {
+            mutableStateListOf(
+                Producto(1, "Flor silvestre", 10.0, "Hermosa flor", ""),
+                Producto(2, "Maceta ecológica", 25.0, "Ideal para plantas", "")
+            )
+        }
+        val carrito = remember { mutableStateListOf<Producto>() }
+        Catalogo(
+            productos = productos,
+            carrito = carrito,
+            onNavigateToRegistro = {},
+            onNavigateToCarrito = {},
+            onNavigateToDetalle = {}
         )
     }
 }
